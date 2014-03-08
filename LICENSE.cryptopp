@@ -1,3 +1,6 @@
+This version of code is icensed using the Boost 1.0 license, since it uses Crypto++ as a compilation.
+
+The Crypto++ library is licensed as follows:
 Compilation Copyright (c) 1995-2013 by Wei Dai.  All rights reserved.
 This copyright applies only to this software distribution package 
 as a compilation, and does not imply a copyright on any particular 
