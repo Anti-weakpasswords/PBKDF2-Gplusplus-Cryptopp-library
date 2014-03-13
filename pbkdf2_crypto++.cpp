@@ -131,7 +131,7 @@ string PBKDF2_HMAC_MD5_string(string pass, string salt, uint iterations, uint ou
 
 int main(int argc, char ** argv)
 {
-  std::string pass, salt, hexResult, expected;
+  std::string pass, salt, hexResult, expected, algoString;
   int iterations = 0, outputBytes = 0, algo = 0, c;
   byte verbose = 0, help = 0, interactive = 0;
   std::locale loc;
@@ -142,35 +142,7 @@ int main(int argc, char ** argv)
     switch (c)
       {
       case 'a':
-        if (strcmp(optarg,"SHA-512")==0)
-          {
-            algo = SHA_512_cryptopp;
-          }
-        else if (strcmp(optarg,"SHA-384")==0)
-          {
-            algo = SHA_384_cryptopp;
-          }
-        else if (strcmp(optarg,"SHA-256")==0)
-          {
-            algo = SHA_256_cryptopp;
-          }
-        else if (strcmp(optarg,"SHA-224")==0)
-          {
-            algo = SHA_224_cryptopp;
-          }
-        else if (strcmp(optarg,"SHA-1")==0)
-          {
-            algo = SHA_1_cryptopp;
-          }
-        else if (strcmp(optarg,"MD5")==0)
-          {
-            algo = MD5_cryptopp;
-          }
-        else
-          {
-            cout << "ERROR: -a argument '" << optarg << "'  unknown." << std::endl;
-            return 4;
-          }
+        algoString = optarg;
         break;
       case 'p':
         pass = optarg;
@@ -221,7 +193,23 @@ int main(int argc, char ** argv)
       {
       std::cout << " x86 ";
       };
-    std::cout << std::endl << "Running with Crypto++ version ???" << std::endl;
+    #if defined(CRYPTOPP_BOOL_X86)
+      std::cout << " CRYPTOPP_BOOL_X86 1";
+    #endif
+    #if defined(CRYPTOPP_X86_ASM_AVAILABLE)
+      std::cout << " CRYPTOPP_X86_ASM_AVAILABLE 1";
+    #endif
+    #if defined(CRYPTOPP_X64_MASM_AVAILABLE)
+      std::cout << " CRYPTOPP_X64_MASM_AVAILABLE 1";
+    #endif
+    #if defined(CRYPTOPP_GENERATE_X64_MASM)
+      std::cout << " CRYPTOPP_GENERATE_X64_MASM 1";
+    #endif
+    #if defined(CRYPTOPP_BOOL_SSE2_ASM_AVAILABLE)
+      std::cout << " CRYPTOPP_BOOL_SSE2_ASM_AVAILABLE 1";
+    #endif
+
+    std::cout << std::endl << "Running with Crypto++ version (detecting current library not yet implemented)" << std::endl;
 
     cout << "Example: " << argv[0] << " -a SHA-512 -p password -s salt -i 131072 -o 64" << std::endl;
     cout << "\nOptions: " << std::endl;
@@ -236,23 +224,60 @@ int main(int argc, char ** argv)
     cout << "  -o bytes           Number of bytes of output; for password hashing, keep less than or equal to native hash size (MD5 <=16, SHA-1 <=20, SHA-256 <=32, SHA-512 <=64)" << std::endl;
     cout << "  -O outputfmt       Output format NOT YET IMPLEMENTED - always HEX (lowercase)" << std::endl;
     cout << "  -e hash            Expected hash (in the same format as outputfmt) results in output of 0 <actual> <expected> = different, 1 = same NOT YET IMPLEMENTED" << std::endl;
-    cout << "  -n                 Interactive mode - NEEDS ONLY -a algo command line argument - asks for password, salt, iterations, outputBytes" << std::endl;
+    cout << "  -n                 Interactive mode - needs no other arguments - asks for password, salt, iterations, outputBytes, and algorithm" << std::endl;
     };
 
 
   if (interactive)
     {
-    std::cout << std::endl << "Enter pass: ";
+    std::cout << std::endl << "Enter pass: " << std::endl;
     std::getline(std::cin,pass);
-    std::cout << "Enter salt: ";
+    std::cout << "Enter salt: " << std::endl;
     std::getline(std::cin,salt);
-    std::cout << "Enter iterations: ";
+    std::cout << "Enter iterations: " << std::endl;
     std::cin >> iterations;
-    std::cout << "Enter outputBytes: ";
+    std::cout << "Enter outputBytes: " << std::endl;
     std::cin >> outputBytes;
+    std::cout << "Enter algorithm - valid values are one of SHA-512|SHA-384|SHA-256|SHA-224|SHA-1|MD5: " << std::endl;
+    std::cin >> algoString;
     //  std::cout << "Enter expected result hash (lower case hex): ";
     //  std::cin >> expected;
     };
+
+  if(algoString.compare("")==0)
+    {
+    cout << "Use -h for help." << std::endl;
+    }
+
+  if (algoString.compare("SHA-512")==0)
+    {
+      algo = SHA_512_cryptopp;
+    }
+  else if (algoString.compare("SHA-384")==0)
+    {
+      algo = SHA_384_cryptopp;
+    }
+  else if (algoString.compare("SHA-256")==0)
+    {
+      algo = SHA_256_cryptopp;
+    }
+  else if (algoString.compare("SHA-224")==0)
+    {
+      algo = SHA_224_cryptopp;
+    }
+  else if (algoString.compare("SHA-1")==0)
+    {
+      algo = SHA_1_cryptopp;
+    }
+  else if (algoString.compare("MD5")==0)
+    {
+      algo = MD5_cryptopp;
+    }
+  else
+    {
+      cout << "ERROR: algorithm '" << algoString << "'  unknown." << std::endl;
+      return 4;
+    }
 
 
   if (verbose)
